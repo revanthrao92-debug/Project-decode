@@ -141,7 +141,7 @@ export default function Hero() {
     setItems([]);
     setStatus("idle");
     setError(null);
-    setFocus({ lat: 20, lng: 78, altitude: 2.3 });
+    setFocus({ lat: 20, lng: 78, altitude: 2.05 });
   };
 
   const results = useMemo(() => {
@@ -274,7 +274,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div ref={panel} className="mt-6 lg:mt-10">
+      <div ref={panel} className={selection ? "mt-6 lg:mt-10" : ""}>
         {selection && (
           <div className="rounded-2xl border border-line bg-white/60 p-5 lg:p-7">
             <div className="flex flex-wrap items-start justify-between gap-4">

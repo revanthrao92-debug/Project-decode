@@ -77,7 +77,7 @@ export default function GlobeCanvas({
     if (ready.current || !globe.current) return;
     ready.current = true;
 
-    globe.current.pointOfView({ lat: 20, lng: 78, altitude: 2.3 }, 0);
+    globe.current.pointOfView({ lat: 20, lng: 78, altitude: 2.05 }, 0);
 
     const controls = globe.current.controls();
     if (!controls) return;
@@ -87,7 +87,7 @@ export default function GlobeCanvas({
     controls.enableDamping = true;
     controls.dampingFactor = 0.09;
     controls.minDistance = 150;
-    controls.maxDistance = 620;
+    controls.maxDistance = 560;
   };
 
   return (
