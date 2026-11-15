@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #faf9f6;
+  --color-paper-2: #f3f1eb;
+  --color-ink: #15181c;
+  --color-ink-soft: #565d66;
+  --color-line: #e6e3dc;
+  --color-brand: #00d800;
+  --color-brand-deep: #0b6b2f;
+  --color-hot: #ef3d24;
+
+  --font-display: var(--font-anton), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand) 35%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-deep);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+/* thin hairline that reads the same on every screen */
+@utility hairline {
+  border-color: var(--color-line);
+}
+
+/* the globe's loading shell: a soft sphere, so the layout never jumps */
+.globe-skeleton {
+  width: min(68%, 330px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 32% 26%,
+    #f6f8f5 0%,
+    #e6ece7 42%,
+    #d3ded7 100%
+  );
+  box-shadow: inset -12px -18px 40px rgba(21, 24, 28, 0.12);
+  animation: globe-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes globe-pulse {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* let a vertical swipe scroll the page instead of being swallowed by the globe */
+.globe-wrap canvas {
+  touch-action: pan-y !important;
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Project Decode">
+  <rect width="64" height="64" rx="14" fill="#00D800"/>
+  <path fill="#F4F2EC" fill-rule="evenodd" d="M16 12h16a20 20 0 0 1 0 40H16V12Zm9 9v22h7a11 11 0 0 0 0-22h-7Z"/>
+  <circle cx="53" cy="50" r="4.5" fill="#EF3D24"/>
+</svg>
