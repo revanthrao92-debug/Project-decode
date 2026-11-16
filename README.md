@@ -24,7 +24,10 @@ No API keys, no database, no CMS. Clone it on any machine and it runs.
 | Piece | Where | Notes |
 | --- | --- | --- |
 | Globe | `components/GlobeCanvas.tsx` | three.js, lazy-loaded so it never blocks first paint |
-| Hero, search, region panel | `components/Hero.tsx` | owns all interaction state |
+| Globe stage, search, region panel | `components/GlobeStage.tsx` | owns all interaction state |
+| Logo intro | `components/Intro.tsx` | plays once per session, skippable, respects reduced-motion |
+| Masthead, dateline, section nav | `components/Masthead.tsx` | the newsroom header |
+| Homepage grid | `components/NewsGrid.tsx` | lead + rail, latest grid, section rows |
 | News lookup | `lib/news.ts` + `app/api/news/route.ts` | Google News RSS, 10-minute cache, deduped |
 | Country borders | `public/geo/countries.json` | generated, 110m resolution, ~410 KB (~130 KB gzipped) |
 | Searchable places | `public/geo/places.json` | every country plus its capital |
@@ -46,11 +49,18 @@ after bumping either dependency. Nothing else needs it.
 - **The logo is white**, so it lives on a green tile, not on the cream page. The
   tile colour matches the source video exactly, so no keying artefacts.
 - **Anton for display, Inter for everything else.** No third family.
+- **The intro is a session-scoped title card.** It plays the logo video once,
+  fades out, and never repeats in the same tab session. Skippable, and skipped
+  entirely under `prefers-reduced-motion`.
+- **No story appears twice on the homepage.** `bySection()` in
+  `lib/decodes.ts` excludes anything already used by the lead, rail or latest
+  grid.
 
 ## Content
 
-`lib/decodes.ts` drives the homepage cards. The cards are placeholders — the
-slugs match the intended MDX files in `content/decodes/`.
+`lib/decodes.ts` drives every block on the homepage: the lead, the rail, the
+latest grid and the section rows. The cards are placeholders — the slugs match
+the intended MDX files in `content/decodes/`.
 
 Phase B (real article pages) means: add `@next/mdx` or `gray-matter` + a
 `[slug]` route, read frontmatter into `DecodeCard`, and swap the placeholder

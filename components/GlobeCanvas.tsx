@@ -36,9 +36,9 @@ export default function GlobeCanvas({
   const material = useMemo(
     () =>
       new THREE.MeshPhongMaterial({
-        color: "#d6e2db",
-        emissive: "#9db3a8",
-        emissiveIntensity: 0.5,
+        color: "#cddcd3",
+        emissive: "#8fa79a",
+        emissiveIntensity: 0.46,
         shininess: 0.2,
       }),
     [],

@@ -1,18 +1,18 @@
-import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
-import DecodeGrid from "@/components/DecodeGrid";
+import Intro from "@/components/Intro";
+import Masthead from "@/components/Masthead";
+import GlobeStage from "@/components/GlobeStage";
+import NewsGrid from "@/components/NewsGrid";
 import FollowStrip from "@/components/FollowStrip";
 import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
-      <Nav />
+      <Intro />
+      <Masthead />
       <main className="flex-1">
-        <Hero />
-        <HowItWorks />
-        <DecodeGrid />
+        <GlobeStage />
+        <NewsGrid />
         <FollowStrip />
       </main>
       <Footer />

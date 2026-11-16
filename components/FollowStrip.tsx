@@ -10,7 +10,7 @@ export default function FollowStrip() {
         />
         <div className="relative flex flex-wrap items-end justify-between gap-8">
           <div>
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.42em] text-ink/60">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.42em] text-ink/80">
               Project
             </p>
             <p className="display mt-1 text-[clamp(2.2rem,5vw,3.6rem)] text-white">

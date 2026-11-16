@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Nav from "@/components/Nav";
+import Masthead from "@/components/Masthead";
 import Footer from "@/components/Footer";
+import HowItWorks from "@/components/HowItWorks";
 
 export const metadata: Metadata = {
   title: "About",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <Nav />
+      <Masthead />
       <main className="flex-1">
         <article className="mx-auto w-full max-w-3xl px-5 py-14 lg:px-8 lg:py-20">
           <p className="label">About</p>
@@ -76,6 +77,7 @@ export default function AboutPage() {
             </p>
           </div>
         </article>
+        <HowItWorks />
       </main>
       <Footer />
     </>

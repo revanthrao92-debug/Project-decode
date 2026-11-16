@@ -18,10 +18,13 @@ export default function Footer() {
           <div>
             <p className="label">Sections</p>
             <ul className="mt-3 space-y-2 text-ink-soft">
-              <li>World</li>
-              <li>Geopolitics</li>
-              <li>Finance</li>
-              <li>Tech &amp; AI</li>
+              {site.sections.map((section) => (
+                <li key={section}>
+                  <a href="#latest" className="hover:text-ink">
+                    {section}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
