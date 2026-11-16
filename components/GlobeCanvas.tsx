@@ -21,6 +21,27 @@ type Props = {
   onPick: (feature: CountryFeature) => void;
 };
 
+type State = "selected" | "hovered" | "continent" | "base";
+
+const ALTITUDE: Record<State, number> = {
+  selected: 0.032,
+  hovered: 0.018,
+  continent: 0.01,
+  base: 0.006,
+};
+const CAP: Record<State, string> = {
+  selected: "#c2410c",
+  hovered: "#f0913f",
+  continent: "#f0913f",
+  base: "rgba(247,203,160,0.97)",
+};
+const STROKE: Record<State, string> = {
+  selected: "#9a3412",
+  hovered: "#b45309",
+  continent: "#b45309",
+  base: "rgba(214,158,110,0.85)",
+};
+
 export default function GlobeCanvas({
   geo,
   activeContinent,
@@ -57,23 +78,38 @@ export default function GlobeCanvas({
     return () => ro.disconnect();
   }, []);
 
+  // One place decides whether the globe spins: only when nothing is selected
+  // or under the pointer.
   useEffect(() => {
-    if (!ready.current || !globe.current) return;
-    const controls = globe.current.controls();
+    const controls = ready.current ? globe.current?.controls() : null;
     if (!controls) return;
-    controls.autoRotate = !activeContinent && !selectedIso;
-    controls.autoRotateSpeed = 0.45;
-  }, [activeContinent, selectedIso]);
+    controls.autoRotate = !activeContinent && !selectedIso && !hoveredIso;
+  }, [activeContinent, selectedIso, hoveredIso]);
 
   useEffect(() => {
-    if (!focus || !globe.current) return;
-    globe.current.pointOfView(
+    if (!focus) return;
+    globe.current?.pointOfView(
       { lat: focus.lat, lng: focus.lng, altitude: focus.altitude },
       900,
     );
-    const controls = globe.current.controls();
-    if (controls) controls.autoRotate = false;
   }, [focus]);
+
+  // Accessors are memoised so a hover only re-styles when its inputs change.
+  const style = useMemo(() => {
+    const state = (f: CountryFeature) =>
+      f.id === selectedIso
+        ? "selected"
+        : f.id === hoveredIso
+          ? "hovered"
+          : f.properties.continent === activeContinent
+            ? "continent"
+            : "base";
+    return {
+      altitude: (f: object) => ALTITUDE[state(f as CountryFeature)],
+      cap: (f: object) => CAP[state(f as CountryFeature)],
+      stroke: (f: object) => STROKE[state(f as CountryFeature)],
+    };
+  }, [selectedIso, hoveredIso, activeContinent]);
 
   const handleReady = () => {
     if (ready.current || !globe.current) return;
@@ -110,34 +146,12 @@ export default function GlobeCanvas({
           atmosphereColor="#9dc4d4"
           atmosphereAltitude={0.13}
           polygonsData={geo.features}
-          polygonAltitude={(feature) => {
-            const f = feature as CountryFeature;
-            if (f.id === selectedIso) return 0.032;
-            if (f.id === hoveredIso) return 0.018;
-            if (f.properties.continent === activeContinent) return 0.01;
-            return 0.006;
-          }}
-          polygonCapColor={(feature) => {
-            const f = feature as CountryFeature;
-            if (f.id === selectedIso) return "#c2410c";
-            if (f.id === hoveredIso) return "#f0913f";
-            if (f.properties.continent === activeContinent) return "#f0913f";
-            return "rgba(247,203,160,0.97)";
-          }}
+          polygonAltitude={style.altitude}
+          polygonCapColor={style.cap}
           polygonSideColor={() => "rgba(146,96,44,0.55)"}
-          polygonStrokeColor={(feature) => {
-            const f = feature as CountryFeature;
-            if (f.id === selectedIso) return "#9a3412";
-            if (f.id === hoveredIso) return "#b45309";
-            if (f.properties.continent === activeContinent) return "#b45309";
-            return "rgba(214,158,110,0.85)";
-          }}
+          polygonStrokeColor={style.stroke}
           polygonCapCurvatureResolution={3}
-          onPolygonHover={(feature) => {
-            onHover((feature as CountryFeature) ?? null);
-            const controls = globe.current?.controls();
-            if (controls && feature) controls.autoRotate = false;
-          }}
+          onPolygonHover={(feature) => onHover((feature as CountryFeature) ?? null)}
           onPolygonClick={(feature) => onPick(feature as CountryFeature)}
           onGlobeReady={handleReady}
         />

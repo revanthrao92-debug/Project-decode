@@ -7,6 +7,19 @@ type Entry = { at: number; items: NewsItem[] };
 const cache = new Map<string, Entry>();
 const TTL = 10 * 60 * 1000;
 
+const MAX_ENTRIES = 200;
+
+/** Insertion order is age order, so the first key is always the oldest. */
+function remember(key: string, items: NewsItem[]) {
+  cache.delete(key);
+  cache.set(key, { at: Date.now(), items });
+  while (cache.size > MAX_ENTRIES) {
+    cache.delete(cache.keys().next().value as string);
+  }
+}
+
+const CACHE_HEADERS = { "Cache-Control": "public, max-age=300, s-maxage=600" };
+
 function sanitise(raw: string | null): string {
   if (!raw) return "";
   return raw
@@ -31,24 +44,18 @@ export async function GET(request: NextRequest) {
   if (hit && Date.now() - hit.at < TTL) {
     return NextResponse.json(
       { q, items: hit.items, cached: true },
-      { headers: { "Cache-Control": "public, max-age=300, s-maxage=600" } },
+      { headers: CACHE_HEADERS },
     );
   }
 
   try {
     const items = await fetchNews(q, 9);
-    cache.set(key, { at: Date.now(), items });
-
-    // keep the map from growing forever
-    if (cache.size > 200) {
-      for (const [k, v] of cache) {
-        if (Date.now() - v.at > TTL) cache.delete(k);
-      }
-    }
+    // Empty results are usually a blip upstream, so don't pin them for 10 minutes.
+    if (items.length > 0) remember(key, items);
 
     return NextResponse.json(
       { q, items, cached: false },
-      { headers: { "Cache-Control": "public, max-age=300, s-maxage=600" } },
+      { headers: CACHE_HEADERS },
     );
   } catch (error) {
     console.error("news lookup failed", error);

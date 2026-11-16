@@ -7,29 +7,29 @@ export type NewsItem = {
 
 const GOOGLE_NEWS = "https://news.google.com/rss/search";
 
+/** There is no sport section on this site, so keep it out of every lookup. */
+const SPORTS_FILTER =
+  "-cricket -football -soccer -tennis -olympics -badminton";
+
+const isWebUrl = (value: string) => /^https?:\/\//i.test(value);
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  nbsp: " ",
+};
+
+/** One pass, so `&amp;#38;` decodes to `&#38;` and not further. */
 function decodeEntities(input: string): string {
-  const named: Record<string, string> = {
-    amp: "&",
-    quot: '"',
-    apos: "'",
-    lt: "<",
-    gt: ">",
-    nbsp: " ",
-    "#39": "'",
-    "#x27": "'",
-    "#x2F": "/",
-  };
-  return input
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
-      String.fromCodePoint(Number.parseInt(hex, 16)),
-    )
-    .replace(/&#(\d+);/g, (_, dec) =>
-      String.fromCodePoint(Number.parseInt(dec, 10)),
-    )
-    .replace(/&([a-z]+|#x?[0-9a-f]+);/gi, (match, name) => {
-      const key = name.toLowerCase();
-      return named[key] ?? named[`#${key.replace(/^#/, "")}`] ?? match;
-    });
+  return input.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, body: string) => {
+    if (body[0] !== "#") return NAMED_ENTITIES[body.toLowerCase()] ?? match;
+    const hex = body[1].toLowerCase() === "x";
+    const code = Number.parseInt(body.slice(hex ? 2 : 1), hex ? 16 : 10);
+    return code <= 0x10ffff ? String.fromCodePoint(code) : match;
+  });
 }
 
 function pick(block: string, tag: string): string {
@@ -46,7 +46,7 @@ function pick(block: string, tag: string): string {
  */
 export async function fetchNews(query: string, limit = 9): Promise<NewsItem[]> {
   const params = new URLSearchParams({
-    q: `${query} when:2d`,
+    q: `${query} ${SPORTS_FILTER} when:2d`,
     hl: "en-IN",
     gl: "IN",
     ceid: "IN:en",
@@ -64,13 +64,16 @@ export async function fetchNews(query: string, limit = 9): Promise<NewsItem[]> {
   if (!res.ok) throw new Error(`News feed returned ${res.status}`);
 
   const xml = await res.text();
+  // A consent or captcha page comes back as 200 with no feed in it.
+  if (!xml.includes("<rss")) throw new Error("News feed returned no RSS");
+
   const blocks = xml.match(/<item>[\s\S]*?<\/item>/gi) ?? [];
   const seen = new Set<string>();
   const items: NewsItem[] = [];
 
   for (const block of blocks) {
     const url = pick(block, "link");
-    if (!url) continue;
+    if (!isWebUrl(url)) continue;
 
     const source = pick(block, "source") || "News";
     let title = pick(block, "title");

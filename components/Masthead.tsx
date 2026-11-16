@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LogoMark from "./LogoMark";
 import Dateline from "./Dateline";
+import { LiveDot, SearchIcon } from "./icons";
 import { site } from "@/lib/site";
 
 export default function Masthead() {
@@ -10,10 +11,7 @@ export default function Masthead() {
       <div className="border-b border-line/70">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-2 text-[0.6875rem] uppercase tracking-[0.14em] text-ink-soft lg:px-8">
           <p className="flex items-center gap-2">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hot" />
-            </span>
+            <LiveDot />
             <Dateline />
             <span className="hidden sm:inline">· India edition</span>
           </p>
@@ -57,17 +55,7 @@ export default function Masthead() {
             href="/#globe"
             className="hidden shrink-0 items-center gap-1.5 py-3 text-[0.8125rem] font-medium text-brand-deep sm:flex"
           >
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.7}
-              className="h-4 w-4"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m16.5 16.5 4 4" strokeLinecap="round" />
-            </svg>
+            <SearchIcon />
             Search the globe
           </Link>
         </div>

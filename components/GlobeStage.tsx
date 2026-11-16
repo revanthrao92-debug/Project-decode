@@ -1,49 +1,57 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTINENTS, timeAgo } from "@/lib/continents";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CONTINENTS } from "@/lib/continents";
 import type {
   CountryFeature,
   GeoCollection,
   Place,
   Selection,
 } from "@/lib/types";
-import type { NewsItem } from "@/lib/news";
 import type { Focus } from "./GlobeCanvas";
-import CardArt from "./CardArt";
+import PlaceSearch from "./PlaceSearch";
+import RegionPanel from "./RegionPanel";
+import { useNews } from "./useNews";
 
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), { ssr: false });
 
-/** There is no sport section on this site, so keep it out of globe results. */
-const SPORTS_FILTER =
-  "-cricket -football -soccer -tennis -olympics -badminton";
+const HOME_VIEW: Focus = { lat: 20, lng: 78, altitude: 2.05 };
 
-type Status = "idle" | "loading" | "done" | "error";
+/** If the intro's "done" event is missed, mount the globe anyway after this. */
+const GLOBE_FAILSAFE_MS = 4000;
+
+function placeSelection(place: Place): Selection {
+  const isCity = place.kind === "city" && place.country;
+  return {
+    query: isCity ? `${place.name} ${place.country}` : place.name,
+    label: isCity ? `${place.name}, ${place.country}` : place.name,
+    continent: place.continent,
+    lat: place.lat,
+    lng: place.lng,
+    iso: place.iso,
+  };
+}
 
 export default function GlobeStage() {
   const [geo, setGeo] = useState<GeoCollection | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [geoError, setGeoError] = useState<string | null>(null);
   const [hovered, setHovered] = useState<CountryFeature | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [focus, setFocus] = useState<Focus | null>(null);
-  const [items, setItems] = useState<NewsItem[]>([]);
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
-
   const [globeReady, setGlobeReady] = useState(false);
 
+  const news = useNews();
+  const loadNews = news.load;
   const panel = useRef<HTMLDivElement | null>(null);
-  const requestId = useRef(0);
 
   // Hold the WebGL globe until the intro has finished, so the two never fight
-  // for the GPU. Falls back to mounting anyway if the event is missed.
+  // for the GPU.
   useEffect(() => {
     const onDone = () => setGlobeReady(true);
     window.addEventListener("pd:intro-done", onDone, { once: true });
-    const failsafe = window.setTimeout(() => setGlobeReady(true), 4000);
+    const failsafe = window.setTimeout(onDone, GLOBE_FAILSAFE_MS);
     return () => {
       window.removeEventListener("pd:intro-done", onDone);
       window.clearTimeout(failsafe);
@@ -62,118 +70,51 @@ export default function GlobeStage() {
         setPlaces(placeList as Place[]);
       })
       .catch(() => {
-        if (alive) setError("The globe data didn't load. Reload to try again.");
+        if (alive) setGeoError("The globe data didn't load. Reload to try again.");
       });
     return () => {
       alive = false;
     };
   }, []);
 
-  const load = useCallback(async (next: Selection) => {
-    setSelection(next);
-    setStatus("loading");
-    setItems([]);
-    setError(null);
-    const id = ++requestId.current;
+  const select = useCallback(
+    (next: Selection, altitude: number) => {
+      setSelection(next);
+      void loadNews(next.query);
+      setFocus({ lat: next.lat, lng: next.lng, altitude });
+      window.setTimeout(() => {
+        panel.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 140);
+    },
+    [loadNews],
+  );
 
-    try {
-      const res = await fetch(
-        `/api/news?q=${encodeURIComponent(`${next.query} ${SPORTS_FILTER}`)}`,
-      );
-      const payload = await res.json();
-      if (id !== requestId.current) return;
-      if (!res.ok) throw new Error(payload?.error ?? "Something went wrong.");
-      setItems((payload.items ?? []) as NewsItem[]);
-      setStatus("done");
-    } catch (err) {
-      if (id !== requestId.current) return;
-      setError(
-        err instanceof Error ? err.message : "Something went wrong. Try again.",
-      );
-      setStatus("error");
-    }
-  }, []);
-
-  const revealPanel = () => {
-    window.setTimeout(() => {
-      panel.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 140);
-  };
-
-  const pickCountry = (feature: CountryFeature) => {
-    const { name, continent, lat, lng, iso } = feature.properties;
-    void load({ query: name, label: name, continent, lat, lng, iso });
-    setFocus({ lat, lng, altitude: 1.5 });
-    revealPanel();
-  };
+  const pickCountry = useCallback(
+    ({ properties: p }: CountryFeature) =>
+      select(
+        { query: p.name, label: p.name, continent: p.continent, lat: p.lat, lng: p.lng, iso: p.iso },
+        1.5,
+      ),
+    [select],
+  );
 
   const pickContinent = (name: string) => {
     const target = CONTINENTS.find((c) => c.name === name);
     if (!target) return;
-    void load({
-      query: target.name,
-      label: target.name,
-      continent: target.name,
-      lat: target.lat,
-      lng: target.lng,
-    });
-    setFocus({ lat: target.lat, lng: target.lng, altitude: 2 });
-    revealPanel();
+    select(
+      { query: target.name, label: target.name, continent: target.name, lat: target.lat, lng: target.lng },
+      2,
+    );
   };
 
-  const pickPlace = (place: Place) => {
-    const label =
-      place.kind === "city" && place.country
-        ? `${place.name}, ${place.country}`
-        : place.name;
-    const search =
-      place.kind === "city" && place.country
-        ? `${place.name} ${place.country}`
-        : place.name;
-
-    void load({
-      query: search,
-      label,
-      continent: place.continent,
-      lat: place.lat,
-      lng: place.lng,
-      iso: place.iso,
-    });
-    setFocus({
-      lat: place.lat,
-      lng: place.lng,
-      altitude: place.kind === "city" ? 1.05 : 1.5,
-    });
-    setQuery("");
-    setSearchOpen(false);
-    revealPanel();
-  };
+  const pickPlace = (place: Place) =>
+    select(placeSelection(place), place.kind === "city" ? 1.05 : 1.5);
 
   const reset = () => {
-    requestId.current++;
     setSelection(null);
-    setItems([]);
-    setStatus("idle");
-    setError(null);
-    setFocus({ lat: 20, lng: 78, altitude: 2.05 });
+    news.clear();
+    setFocus(HOME_VIEW);
   };
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (q.length < 1) return [];
-    return places
-      .filter((p) => p.name.toLowerCase().includes(q))
-      .map((p) => ({
-        place: p,
-        rank:
-          (p.name.toLowerCase().startsWith(q) ? 0 : 20) +
-          (p.kind === "country" ? 0 : 6) +
-          Math.min(p.name.length, 15),
-      }))
-      .sort((a, b) => a.rank - b.rank)
-      .slice(0, 7)
-      .map((r) => r.place);
-  }, [places, query]);
 
   // Only a selected *continent* tints its whole landmass. Hovering highlights
   // the single country under the pointer, which is what people expect.
@@ -201,7 +142,6 @@ export default function GlobeStage() {
               </div>
             )}
           </div>
-
         </div>
 
         <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-1 lg:px-8 lg:pb-10">
@@ -211,67 +151,7 @@ export default function GlobeStage() {
             </h1>
 
             <div className="w-full max-w-sm">
-              <div className="relative">
-                <label htmlFor="place-search" className="label">
-                  Search a place
-                </label>
-                <div className="mt-2 flex items-center gap-2 rounded-full border border-line bg-white/70 px-4 py-2.5 focus-within:border-brand-deep">
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.6}
-                    className="h-4 w-4 shrink-0 text-ink-soft"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m16.5 16.5 4 4" strokeLinecap="round" />
-                  </svg>
-                  <input
-                    id="place-search"
-                    type="text"
-                    value={query}
-                    placeholder="Tokyo, Kenya, Brazil…"
-                    autoComplete="off"
-                    onChange={(event) => {
-                      setQuery(event.target.value);
-                      setSearchOpen(true);
-                    }}
-                    onFocus={() => setSearchOpen(true)}
-                    onBlur={() =>
-                      window.setTimeout(() => setSearchOpen(false), 120)
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && results[0]) {
-                        event.preventDefault();
-                        pickPlace(results[0]);
-                      }
-                      if (event.key === "Escape") setSearchOpen(false);
-                    }}
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-ink-soft/60"
-                  />
-                </div>
-
-                {searchOpen && results.length > 0 && (
-                  <ul className="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-line bg-white shadow-[0_18px_40px_-24px_rgba(21,24,28,0.45)]">
-                    {results.map((place) => (
-                      <li key={`${place.kind}-${place.name}-${place.iso}`}>
-                        <button
-                          type="button"
-                          onMouseDown={(event) => event.preventDefault()}
-                          onClick={() => pickPlace(place)}
-                          className="flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-sm hover:bg-paper-2"
-                        >
-                          <span>{place.name}</span>
-                          <span className="text-[0.6875rem] uppercase tracking-widest text-ink-soft">
-                            {place.kind === "city" ? place.country : "country"}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <PlaceSearch places={places} onPick={pickPlace} />
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {CONTINENTS.map((continent) => {
@@ -280,6 +160,7 @@ export default function GlobeStage() {
                     <button
                       key={continent.name}
                       type="button"
+                      aria-pressed={active}
                       onClick={() => pickContinent(continent.name)}
                       className={`rounded-full border px-3 py-1 text-[0.6875rem] uppercase tracking-[0.1em] transition-colors ${
                         active
@@ -293,10 +174,15 @@ export default function GlobeStage() {
                 })}
               </div>
 
-              <p className="mt-3 min-h-[1rem] text-[0.6875rem] uppercase tracking-[0.14em] text-ink-soft">
-                {hovered
-                  ? `${hovered.properties.name} · ${hovered.properties.continent}`
-                  : "Or tap any country on the globe"}
+              <p
+                className={`mt-3 min-h-[1rem] text-[0.6875rem] uppercase tracking-[0.14em] ${
+                  geoError ? "text-hot" : "text-ink-soft"
+                }`}
+              >
+                {geoError ??
+                  (hovered
+                    ? `${hovered.properties.name} · ${hovered.properties.continent}`
+                    : "Or tap any country on the globe")}
               </p>
             </div>
           </div>
@@ -305,113 +191,14 @@ export default function GlobeStage() {
 
       <div ref={panel}>
         {selection && (
-          <section className="border-y border-line bg-paper-2/60">
-            <div className="mx-auto w-full max-w-6xl px-5 py-8 lg:px-8">
-              <div className="relative overflow-hidden rounded-xl border border-line">
-                <CardArt
-                  seed={`hero-${selection.query}`}
-                  className="h-[150px] rounded-none opacity-40 sm:h-[170px]"
-                />
-                <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-paper via-paper/70 to-paper/20 p-4 sm:p-5">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => void load(selection)}
-                      className="rounded-full border border-line bg-paper/85 px-3.5 py-1.5 text-xs text-ink-soft backdrop-blur-sm transition-colors hover:border-ink/30 hover:text-ink"
-                    >
-                      Refresh
-                    </button>
-                    <button
-                      type="button"
-                      onClick={reset}
-                      className="rounded-full border border-line bg-paper/85 px-3.5 py-1.5 text-xs text-ink-soft backdrop-blur-sm transition-colors hover:border-ink/30 hover:text-ink"
-                    >
-                      Back to globe
-                    </button>
-                  </div>
-
-                  <div>
-                    <p className="label flex items-center gap-2 text-hot">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-70" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hot" />
-                      </span>
-                      Hot right now
-                    </p>
-                    <h2 className="display mt-1 text-[clamp(1.9rem,3.6vw,2.8rem)]">
-                      {selection.label}
-                    </h2>
-                    {selection.label !== selection.continent && (
-                      <p className="mt-0.5 text-[0.6875rem] uppercase tracking-[0.16em] text-ink-soft">
-                        {selection.continent}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6" aria-live="polite">
-                {status === "loading" && (
-                  <ul className="grid gap-x-8 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <li key={index} className="border-t border-line py-4">
-                        <div className="h-3 w-full animate-pulse rounded bg-line" />
-                        <div className="mt-2 h-3 w-4/5 animate-pulse rounded bg-line/70" />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {status === "error" && (
-                  <p className="rounded-xl border border-hot/30 bg-hot/5 p-4 text-sm text-ink-soft">
-                    {error}
-                  </p>
-                )}
-
-                {status === "done" && items.length === 0 && (
-                  <p className="text-sm text-ink-soft">
-                    Nothing fresh for {selection.label} in the last two days. Try
-                    a whole continent instead.
-                  </p>
-                )}
-
-                {status === "done" && items.length > 0 && (
-                  <ol className="grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((item, index) => (
-                      <li key={item.url} className="border-t border-line py-3">
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="group flex gap-3.5"
-                        >
-                          <CardArt
-                            seed={item.url}
-                            bars={10}
-                            className="h-[66px] w-[104px] shrink-0 rounded-md"
-                          />
-                          <span className="min-w-0">
-                            <span className="block text-[0.9375rem] font-medium leading-snug underline-offset-4 group-hover:underline">
-                              {item.title}
-                            </span>
-                            <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[0.625rem] uppercase tracking-[0.14em] text-ink-soft">
-                              <span className="tabular-nums text-ink-soft/60">
-                                {String(index + 1).padStart(2, "0")}
-                              </span>
-                              <span>{item.source}</span>
-                              {item.published && (
-                                <span>· {timeAgo(item.published)}</span>
-                              )}
-                            </span>
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            </div>
-          </section>
+          <RegionPanel
+            selection={selection}
+            items={news.items}
+            status={news.status}
+            error={news.error}
+            onRefresh={() => void news.load(selection.query)}
+            onReset={reset}
+          />
         )}
       </div>
     </>

@@ -20,9 +20,9 @@ export default function Footer() {
             <ul className="mt-3 space-y-2 text-ink-soft">
               {site.sections.map((section) => (
                 <li key={section}>
-                  <a href="#latest" className="hover:text-ink">
+                  <Link href="/#latest" className="hover:text-ink">
                     {section}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -46,9 +46,9 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#decodes" className="text-ink-soft hover:text-ink">
+                <Link href="/#latest" className="text-ink-soft hover:text-ink">
                   Decodes
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
