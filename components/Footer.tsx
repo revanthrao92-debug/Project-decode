@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Wordmark from "./Wordmark";
+import LogoMark from "./LogoMark";
 import { site } from "@/lib/site";
 
 export default function Footer() {
@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="mt-auto border-t border-line">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 lg:flex-row lg:items-start lg:justify-between lg:px-8">
         <div>
-          <Wordmark className="text-[2rem]" />
+          <LogoMark className="h-[38px] w-auto text-ink" />
           <p className="mt-4 max-w-xs text-xs leading-relaxed text-ink-soft">
             World news, decoded for readers in India. Built to be understood, not
             just scrolled.

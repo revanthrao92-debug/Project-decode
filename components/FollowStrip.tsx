@@ -1,4 +1,5 @@
 import { site } from "@/lib/site";
+import LogoMark from "./LogoMark";
 
 export default function FollowStrip() {
   return (
@@ -10,12 +11,7 @@ export default function FollowStrip() {
         />
         <div className="relative flex flex-wrap items-end justify-between gap-8">
           <div>
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.42em] text-ink/80">
-              Project
-            </p>
-            <p className="display mt-1 text-[clamp(2.2rem,5vw,3.6rem)] text-white">
-              Decode<span className="ml-[0.08em] inline-block h-[0.16em] w-[0.16em] rounded-full bg-hot align-baseline" />
-            </p>
+            <LogoMark className="w-[min(280px,62vw)] text-white" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink/80">
               One story a day, drawn apart and put back together. We post the
               decode on Instagram every evening.

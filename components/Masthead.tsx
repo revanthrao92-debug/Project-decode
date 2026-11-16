@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Wordmark from "./Wordmark";
+import LogoMark from "./LogoMark";
 import Dateline from "./Dateline";
 import { site } from "@/lib/site";
 
@@ -33,7 +33,7 @@ export default function Masthead() {
       {/* wordmark */}
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 lg:px-8">
         <Link href="/" className="mx-auto" aria-label="Project Decode, home">
-          <Wordmark className="text-[2.4rem] sm:text-[3rem]" />
+          <LogoMark className="h-[46px] w-auto text-ink sm:h-[58px]" />
         </Link>
       </div>
 
