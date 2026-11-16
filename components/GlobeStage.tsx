@@ -32,8 +32,22 @@ export default function GlobeStage() {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const [globeReady, setGlobeReady] = useState(false);
+
   const panel = useRef<HTMLDivElement | null>(null);
   const requestId = useRef(0);
+
+  // Hold the WebGL globe until the intro has finished, so the two never fight
+  // for the GPU. Falls back to mounting anyway if the event is missed.
+  useEffect(() => {
+    const onDone = () => setGlobeReady(true);
+    window.addEventListener("pd:intro-done", onDone, { once: true });
+    const failsafe = window.setTimeout(() => setGlobeReady(true), 4000);
+    return () => {
+      window.removeEventListener("pd:intro-done", onDone);
+      window.clearTimeout(failsafe);
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -169,14 +183,20 @@ export default function GlobeStage() {
       <section id="globe" className="flex flex-col">
         <div className="relative h-[clamp(320px,54svh,620px)]">
           <div className="absolute inset-0">
-            <GlobeCanvas
-              geo={geo}
-              activeContinent={activeContinent}
-              selectedIso={selection?.iso ?? null}
-              focus={focus}
-              onHover={setHovered}
-              onPick={pickCountry}
-            />
+            {globeReady ? (
+              <GlobeCanvas
+                geo={geo}
+                activeContinent={activeContinent}
+                selectedIso={selection?.iso ?? null}
+                focus={focus}
+                onHover={setHovered}
+                onPick={pickCountry}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <div className="globe-skeleton" />
+              </div>
+            )}
           </div>
 
         </div>

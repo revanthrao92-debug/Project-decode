@@ -17,13 +17,23 @@ export default function Intro() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || sessionStorage.getItem(KEY) === "1") {
+    // ?intro=1 replays the animation on demand, handy for reviewing it
+    const forced = new URLSearchParams(window.location.search).has("intro");
+    if (reduced || (!forced && sessionStorage.getItem(KEY) === "1")) {
       const skip = window.setTimeout(() => setPhase("done"), 0);
       return () => window.clearTimeout(skip);
     }
     const timer = window.setTimeout(leave, DURATION);
     return () => window.clearTimeout(timer);
   }, [leave]);
+
+  // Tell the globe it can start rendering. Until then it stays unmounted, so
+  // WebGL isn't burning the GPU behind an opaque overlay.
+  useEffect(() => {
+    if (phase !== "done") return;
+    document.documentElement.dataset.introDone = "1";
+    window.dispatchEvent(new Event("pd:intro-done"));
+  }, [phase]);
 
   if (phase === "done") return null;
 
