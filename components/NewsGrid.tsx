@@ -1,5 +1,6 @@
 import { bySection, latest, lead, rail } from "@/lib/decodes";
 import type { DecodeCard } from "@/lib/types";
+import CardArt from "./CardArt";
 
 function Meta({ card }: { card: DecodeCard }) {
   return (
@@ -33,6 +34,7 @@ export default function NewsGrid() {
 
         <div className="grid gap-8 pt-7 lg:grid-cols-3 lg:gap-10">
           <article className="lg:col-span-2">
+            <CardArt seed={lead.slug} className="mb-4 aspect-[16/9]" />
             <Tag>{lead.format}</Tag>
             <h3 className="display mt-3 text-[clamp(1.8rem,3.6vw,2.7rem)]">
               <a href="#latest" className="underline-offset-4 hover:underline">
@@ -95,7 +97,8 @@ export default function NewsGrid() {
 
         <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
           {latest.map((card) => (
-            <article key={card.slug} className="border-t border-line pt-4">
+            <article key={card.slug}>
+              <CardArt seed={card.slug} className="mb-3 aspect-[16/9]" />
               <Meta card={card} />
               <h3 className="mt-2 text-[1.0625rem] font-semibold leading-snug">
                 <a

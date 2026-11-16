@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import type { NewsItem } from "@/lib/news";
 import type { Focus } from "./GlobeCanvas";
+import CardArt from "./CardArt";
 
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), { ssr: false });
 
@@ -304,40 +305,46 @@ export default function GlobeStage() {
         {selection && (
           <section className="border-y border-line bg-paper-2/60">
             <div className="mx-auto w-full max-w-6xl px-5 py-8 lg:px-8">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="label flex items-center gap-2 text-hot">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-70" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hot" />
-                    </span>
-                    Hot right now
-                  </p>
-                  <h2 className="display mt-1.5 text-[clamp(1.9rem,3.6vw,2.8rem)]">
-                    {selection.label}
-                  </h2>
-                  {selection.label !== selection.continent && (
-                    <p className="mt-0.5 text-[0.6875rem] uppercase tracking-[0.16em] text-ink-soft">
-                      {selection.continent}
-                    </p>
-                  )}
-                </div>
+              <div className="relative overflow-hidden rounded-xl border border-line">
+                <CardArt
+                  seed={`hero-${selection.query}`}
+                  className="h-[150px] rounded-none opacity-40 sm:h-[170px]"
+                />
+                <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-paper via-paper/70 to-paper/20 p-4 sm:p-5">
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void load(selection)}
+                      className="rounded-full border border-line bg-paper/85 px-3.5 py-1.5 text-xs text-ink-soft backdrop-blur-sm transition-colors hover:border-ink/30 hover:text-ink"
+                    >
+                      Refresh
+                    </button>
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="rounded-full border border-line bg-paper/85 px-3.5 py-1.5 text-xs text-ink-soft backdrop-blur-sm transition-colors hover:border-ink/30 hover:text-ink"
+                    >
+                      Back to globe
+                    </button>
+                  </div>
 
-                <div className="mt-2 flex w-full items-center gap-2 sm:mt-0 sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => void load(selection)}
-                    className="rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs text-ink-soft transition-colors hover:border-ink/30 hover:text-ink"
-                  >
-                    Refresh
-                  </button>
-                  <button
-                    type="button"
-                    onClick={reset}
-                    className="rounded-full border border-line bg-paper px-3.5 py-1.5 text-xs text-ink-soft transition-colors hover:border-ink/30 hover:text-ink"
-                  >
-                    Back to globe
-                  </button>
+                  <div>
+                    <p className="label flex items-center gap-2 text-hot">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-70" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hot" />
+                      </span>
+                      Hot right now
+                    </p>
+                    <h2 className="display mt-1 text-[clamp(1.9rem,3.6vw,2.8rem)]">
+                      {selection.label}
+                    </h2>
+                    {selection.label !== selection.continent && (
+                      <p className="mt-0.5 text-[0.6875rem] uppercase tracking-[0.16em] text-ink-soft">
+                        {selection.continent}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -367,27 +374,32 @@ export default function GlobeStage() {
                 )}
 
                 {status === "done" && items.length > 0 && (
-                  <ol className="grid gap-x-8 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                  <ol className="grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
                     {items.map((item, index) => (
-                      <li key={item.url} className="border-t border-line py-4">
+                      <li key={item.url} className="border-t border-line py-3">
                         <a
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="group flex gap-3"
+                          className="group flex gap-3.5"
                         >
-                          <span className="mt-0.5 text-[0.6875rem] tabular-nums text-ink-soft/70">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
-                          <span>
-                            <span className="block text-[0.95rem] font-medium leading-snug underline-offset-4 group-hover:underline">
+                          <CardArt
+                            seed={item.url}
+                            bars={10}
+                            className="h-[66px] w-[104px] shrink-0 rounded-md"
+                          />
+                          <span className="min-w-0">
+                            <span className="block text-[0.9375rem] font-medium leading-snug underline-offset-4 group-hover:underline">
                               {item.title}
                             </span>
-                            <span className="mt-1.5 block text-[0.6875rem] uppercase tracking-[0.14em] text-ink-soft">
-                              {item.source}
-                              {item.published
-                                ? ` · ${timeAgo(item.published)}`
-                                : ""}
+                            <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[0.625rem] uppercase tracking-[0.14em] text-ink-soft">
+                              <span className="tabular-nums text-ink-soft/60">
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                              <span>{item.source}</span>
+                              {item.published && (
+                                <span>· {timeAgo(item.published)}</span>
+                              )}
                             </span>
                           </span>
                         </a>

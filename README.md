@@ -29,6 +29,7 @@ No API keys, no database, no CMS. Clone it on any machine and it runs.
 | Logo intro | `components/Intro.tsx` | CSS-animated dot, once per session, skippable, respects reduced-motion |
 | Masthead, dateline, section nav | `components/Masthead.tsx` | the newsroom header |
 | Homepage grid | `components/NewsGrid.tsx` | lead + rail, latest grid, section rows |
+| Card art | `components/CardArt.tsx` | deterministic bar-motif image boxes, seeded per slug/URL |
 | News lookup | `lib/news.ts` + `app/api/news/route.ts` | Google News RSS, 10-minute cache, deduped |
 | Country borders | `public/geo/countries.json` | generated, 110m resolution, ~410 KB (~130 KB gzipped) |
 | Searchable places | `public/geo/places.json` | every country plus its capital |
@@ -73,6 +74,24 @@ after bumping either dependency. Nothing else needs it.
 - **No story appears twice on the homepage.** `bySection()` in
   `lib/decodes.ts` excludes anything already used by the lead, rail or latest
   grid.
+
+## Images
+
+Every image box is drawn by `CardArt` from a hash of its seed, so it needs no
+network, no storage and never 404s. That is deliberate:
+
+- Google News RSS carries **no article images**, and its article pages embed a
+  generic Google logo in `og:image` — verified, all six stories returned the
+  same picture.
+- Scraping the real `og:image` means downloading ~600 KB per story, then
+  fetching the publisher page too. Too slow and too fragile for a tap-to-see
+  globe.
+
+**To use real photos later:** get a provider whose API returns an image URL
+(NewsData.io, GNews and Bing News Search all do), add it to the item type in
+`lib/news.ts`, and render it in place of `<CardArt>` in the panel. The layout
+already reserves a 104×66 box per story and 16:9 boxes for cards, so nothing
+reflows.
 
 ## Content
 
