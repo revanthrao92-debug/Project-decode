@@ -10,6 +10,12 @@
   --color-brand-deep: #0b6b2f;
   --color-hot: #ef3d24;
 
+  /* saffron: the globe's own palette, kept separate from the brand green */
+  --color-saffron: #f2c89b;
+  --color-saffron-mid: #e2893f;
+  --color-saffron-deep: #c2410c;
+  --color-saffron-ink: #9a3412;
+
   --font-display: var(--font-anton), "Arial Narrow", system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
@@ -81,9 +87,9 @@
   border-radius: 9999px;
   background: radial-gradient(
     circle at 32% 26%,
-    #f6f8f5 0%,
-    #e6ece7 42%,
-    #d3ded7 100%
+    #fdf5ec 0%,
+    #f4d6b6 42%,
+    #e5b183 100%
   );
   box-shadow: inset -12px -18px 40px rgba(21, 24, 28, 0.12);
   animation: globe-pulse 2.6s ease-in-out infinite;

@@ -281,7 +281,7 @@ export default function GlobeStage() {
                       onClick={() => pickContinent(continent.name)}
                       className={`rounded-full border px-3 py-1 text-[0.6875rem] uppercase tracking-[0.1em] transition-colors ${
                         active
-                          ? "border-brand-deep bg-brand/20 text-brand-deep"
+                          ? "border-saffron-deep bg-saffron/50 text-saffron-ink"
                           : "border-line text-ink-soft hover:border-ink/30 hover:text-ink"
                       }`}
                     >

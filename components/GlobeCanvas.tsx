@@ -36,9 +36,9 @@ export default function GlobeCanvas({
   const material = useMemo(
     () =>
       new THREE.MeshPhongMaterial({
-        color: "#cddcd3",
-        emissive: "#8fa79a",
-        emissiveIntensity: 0.46,
+        color: "#f2c89b",
+        emissive: "#c98f5a",
+        emissiveIntensity: 0.42,
         shininess: 0.2,
       }),
     [],
@@ -105,7 +105,7 @@ export default function GlobeCanvas({
           backgroundColor="rgba(0,0,0,0)"
           globeMaterial={material}
           showAtmosphere
-          atmosphereColor="#4aa877"
+          atmosphereColor="#e2904f"
           atmosphereAltitude={0.13}
           polygonsData={geo.features}
           polygonAltitude={(feature) => {
@@ -116,17 +116,17 @@ export default function GlobeCanvas({
           }}
           polygonCapColor={(feature) => {
             const f = feature as CountryFeature;
-            if (f.id === selectedIso) return "#0b6b2f";
+            if (f.id === selectedIso) return "#c2410c";
             if (f.properties.continent === activeContinent)
-              return "rgba(0,216,0,0.55)";
-            return "rgba(255,255,255,0.97)";
+              return "rgba(226,137,63,0.62)";
+            return "rgba(255,250,242,0.97)";
           }}
-          polygonSideColor={() => "rgba(20,52,38,0.55)"}
+          polygonSideColor={() => "rgba(124,62,20,0.5)"}
           polygonStrokeColor={(feature) => {
             const f = feature as CountryFeature;
-            if (f.id === selectedIso) return "#0b6b2f";
-            if (f.properties.continent === activeContinent) return "#0b6b2f";
-            return "rgba(150,168,158,0.75)";
+            if (f.id === selectedIso) return "#9a3412";
+            if (f.properties.continent === activeContinent) return "#9a3412";
+            return "rgba(198,146,104,0.8)";
           }}
           polygonCapCurvatureResolution={3}
           onPolygonHover={(feature) => {
