@@ -66,10 +66,11 @@ after bumping either dependency. Nothing else needs it.
   the brand video, so it renders identically at any size. It inherits
   `currentColor` — ink on cream, white on the green banner.
 - **Anton for display, Inter for everything else.** No third family.
-- **The globe has its own palette.** Saffron (`--color-saffron*`: `#f2c89b`
-  sphere, `#e2893f` hover, `#c2410c` selection) so the world reads warm against
-  the cream page. Brand green stays for chips, tags and links; the two hues never
-  carry the same meaning.
+- **The globe reads like a map, not a brand asset.** Natural blue water
+  (`#bfd8e2`), light-orange land (`#f7cba0`). Hovering a country turns exactly
+  that country saffron (`#f0913f`); selecting one deepens it to `#c2410c`.
+  Selecting a whole continent via a chip tints every country in it. Brand green
+  stays for chips, tags and links — it never appears on the globe.
 - **The intro is a session-scoped title card.** The red dot's entrance is a CSS
   keyframe animation in `app/globals.css` (`.logo-dot`), timed to the original
   video: fall, four decaying hops, one long arc, squash on landing. It runs on

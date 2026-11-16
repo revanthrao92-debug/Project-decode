@@ -175,9 +175,10 @@ export default function GlobeStage() {
       .map((r) => r.place);
   }, [places, query]);
 
-  const activeContinent = selection
-    ? selection.continent
-    : (hovered?.properties.continent ?? null);
+  // Only a selected *continent* tints its whole landmass. Hovering highlights
+  // the single country under the pointer, which is what people expect.
+  const activeContinent =
+    selection && !selection.iso ? selection.continent : null;
 
   return (
     <>
@@ -188,6 +189,7 @@ export default function GlobeStage() {
               <GlobeCanvas
                 geo={geo}
                 activeContinent={activeContinent}
+                hoveredIso={hovered?.properties.iso ?? null}
                 selectedIso={selection?.iso ?? null}
                 focus={focus}
                 onHover={setHovered}

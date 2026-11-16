@@ -87,9 +87,9 @@
   border-radius: 9999px;
   background: radial-gradient(
     circle at 32% 26%,
-    #fdf5ec 0%,
-    #f4d6b6 42%,
-    #e5b183 100%
+    #eaf3f7 0%,
+    #cfe2ea 42%,
+    #aecdd9 100%
   );
   box-shadow: inset -12px -18px 40px rgba(21, 24, 28, 0.12);
   animation: globe-pulse 2.6s ease-in-out infinite;

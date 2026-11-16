@@ -14,6 +14,7 @@ export type Focus = {
 type Props = {
   geo: GeoCollection | null;
   activeContinent: string | null;
+  hoveredIso: string | null;
   selectedIso: string | null;
   focus: Focus | null;
   onHover: (feature: CountryFeature | null) => void;
@@ -23,6 +24,7 @@ type Props = {
 export default function GlobeCanvas({
   geo,
   activeContinent,
+  hoveredIso,
   selectedIso,
   focus,
   onHover,
@@ -36,9 +38,9 @@ export default function GlobeCanvas({
   const material = useMemo(
     () =>
       new THREE.MeshPhongMaterial({
-        color: "#f2c89b",
-        emissive: "#c98f5a",
-        emissiveIntensity: 0.42,
+        color: "#bfd8e2",
+        emissive: "#8fb3c3",
+        emissiveIntensity: 0.45,
         shininess: 0.2,
       }),
     [],
@@ -105,28 +107,30 @@ export default function GlobeCanvas({
           backgroundColor="rgba(0,0,0,0)"
           globeMaterial={material}
           showAtmosphere
-          atmosphereColor="#e2904f"
+          atmosphereColor="#9dc4d4"
           atmosphereAltitude={0.13}
           polygonsData={geo.features}
           polygonAltitude={(feature) => {
             const f = feature as CountryFeature;
             if (f.id === selectedIso) return 0.032;
-            if (f.properties.continent === activeContinent) return 0.014;
+            if (f.id === hoveredIso) return 0.018;
+            if (f.properties.continent === activeContinent) return 0.01;
             return 0.006;
           }}
           polygonCapColor={(feature) => {
             const f = feature as CountryFeature;
             if (f.id === selectedIso) return "#c2410c";
-            if (f.properties.continent === activeContinent)
-              return "rgba(226,137,63,0.62)";
-            return "rgba(255,250,242,0.97)";
+            if (f.id === hoveredIso) return "#f0913f";
+            if (f.properties.continent === activeContinent) return "#f0913f";
+            return "rgba(247,203,160,0.97)";
           }}
-          polygonSideColor={() => "rgba(124,62,20,0.5)"}
+          polygonSideColor={() => "rgba(146,96,44,0.55)"}
           polygonStrokeColor={(feature) => {
             const f = feature as CountryFeature;
             if (f.id === selectedIso) return "#9a3412";
-            if (f.properties.continent === activeContinent) return "#9a3412";
-            return "rgba(198,146,104,0.8)";
+            if (f.id === hoveredIso) return "#b45309";
+            if (f.properties.continent === activeContinent) return "#b45309";
+            return "rgba(214,158,110,0.85)";
           }}
           polygonCapCurvatureResolution={3}
           onPolygonHover={(feature) => {
