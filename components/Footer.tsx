@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LogoMark from "./LogoMark";
+import { sectionSlug } from "@/lib/decodes";
 import { site } from "@/lib/site";
 
 export default function Footer() {
@@ -20,7 +21,10 @@ export default function Footer() {
             <ul className="mt-3 space-y-2 text-ink-soft">
               {site.sections.map((section) => (
                 <li key={section}>
-                  <Link href="/#latest" className="hover:text-ink">
+                  <Link
+                    href={`/section/${sectionSlug(section)}`}
+                    className="hover:text-ink"
+                  >
                     {section}
                   </Link>
                 </li>

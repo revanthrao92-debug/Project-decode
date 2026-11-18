@@ -6,9 +6,12 @@ export const site = {
   sections: [
     "World",
     "Geopolitics",
+    "Explained",
     "Finance",
     "Tech & AI",
     "Science",
+    "Climate & Environment",
+    "Health",
     "Culture",
   ],
 };

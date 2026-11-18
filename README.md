@@ -31,6 +31,9 @@ No API keys, no database, no CMS. Clone it on any machine and it runs.
 | Homepage grid | `components/NewsGrid.tsx` | lead + rail, latest grid, section rows |
 | Card art | `components/CardArt.tsx` | deterministic bar-motif image boxes, seeded per slug/URL |
 | News lookup | `lib/news.ts` + `app/api/news/route.ts` | Google News RSS, 10-minute cache, deduped |
+| Rupee strip | `lib/markets.ts`, `components/MarketStrip.tsx` | ECB reference rates via Frankfurter (free, no key), refreshed hourly; the strip hides itself if the service is down |
+| Sections and rows | `lib/site.ts`, `lib/headlines.ts` | World, Geopolitics, Explained (any explainer-style headline), Finance, Tech & AI, Science, Climate & Environment, Health, Culture. Section pages show live stories plus authored decodes. "Country in focus" picks the country in the most headlines, with a button that opens it on the globe |
+| Homepage news | `lib/feeds.ts`, `lib/rss.ts`, `lib/headlines.ts` | Publisher RSS, refreshed every 8 hours (`use cache`). Images only for sources listed with `imageHosts`; edit or delete a feed in `lib/feeds.ts`. Every card with an image box gets a picture: the publisher's own photo, else an openly licensed match from Openverse (`lib/related-image.ts`: headline keywords, then a named country, then a concrete topic), else a bundled public-domain image for its section (`lib/fallback-images.ts`, files in `public/fallback/`). No picture repeats on the page; non-publisher images are captioned "Illustrative image" with credit and licence |
 | Country borders | `public/geo/countries.json` | generated, 110m resolution, ~410 KB (~130 KB gzipped) |
 | Searchable places | `public/geo/places.json` | every country plus its capital |
 | Design tokens | `app/globals.css` | `@theme` block — paper, ink, brand, hot |
@@ -66,9 +69,9 @@ after bumping either dependency. Nothing else needs it.
   the brand video, so it renders identically at any size. It inherits
   `currentColor` — ink on cream, white on the green banner.
 - **Anton for display, Inter for everything else.** No third family.
-- **The globe reads like a map, not a brand asset.** Natural blue water
-  (`#bfd8e2`), light-orange land (`#f7cba0`). Hovering a country turns exactly
-  that country saffron (`#f0913f`); selecting one deepens it to `#c2410c`.
+- **The globe reads like a map, not a brand asset.** Matte orange water
+  (`#e8863a`), cream-peach land (`#fbe3c8`). Hovering a country turns exactly
+  that country burnt orange (`#c2410c`); selecting one deepens it to `#7c2d12`.
   Selecting a whole continent via a chip tints every country in it. Brand green
   stays for chips, tags and links — it never appears on the globe.
 - **The intro is a session-scoped title card.** The red dot's entrance is a CSS

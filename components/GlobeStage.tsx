@@ -110,6 +110,17 @@ export default function GlobeStage() {
   const pickPlace = (place: Place) =>
     select(placeSelection(place), place.kind === "city" ? 1.05 : 1.5);
 
+  // News cards ask the globe to show a country ("See India on the globe").
+  useEffect(() => {
+    const onFocus = (event: Event) => {
+      const name = String((event as CustomEvent).detail ?? "");
+      const match = places.find((p) => p.name === name);
+      if (match) select(placeSelection(match), match.kind === "city" ? 1.05 : 1.5);
+    };
+    window.addEventListener("pd:focus-place", onFocus);
+    return () => window.removeEventListener("pd:focus-place", onFocus);
+  }, [places, select]);
+
   const reset = () => {
     setSelection(null);
     news.clear();

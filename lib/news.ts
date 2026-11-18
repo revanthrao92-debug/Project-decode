@@ -23,7 +23,7 @@ const NAMED_ENTITIES: Record<string, string> = {
 };
 
 /** One pass, so `&amp;#38;` decodes to `&#38;` and not further. */
-function decodeEntities(input: string): string {
+export function decodeEntities(input: string): string {
   return input.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, body: string) => {
     if (body[0] !== "#") return NAMED_ENTITIES[body.toLowerCase()] ?? match;
     const hex = body[1].toLowerCase() === "x";
@@ -32,7 +32,7 @@ function decodeEntities(input: string): string {
   });
 }
 
-function pick(block: string, tag: string): string {
+export function pick(block: string, tag: string): string {
   const match = block.match(
     new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "i"),
   );

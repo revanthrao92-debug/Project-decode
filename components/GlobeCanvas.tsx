@@ -30,16 +30,16 @@ const ALTITUDE: Record<State, number> = {
   base: 0.006,
 };
 const CAP: Record<State, string> = {
-  selected: "#c2410c",
-  hovered: "#f0913f",
-  continent: "#f0913f",
-  base: "rgba(247,203,160,0.97)",
+  selected: "#7c2d12",
+  hovered: "#c2410c",
+  continent: "#d9772b",
+  base: "rgba(251,227,200,0.97)",
 };
 const STROKE: Record<State, string> = {
-  selected: "#9a3412",
-  hovered: "#b45309",
-  continent: "#b45309",
-  base: "rgba(214,158,110,0.85)",
+  selected: "#431407",
+  hovered: "#7c2d12",
+  continent: "#9a3412",
+  base: "rgba(176,98,40,0.8)",
 };
 
 export default function GlobeCanvas({
@@ -59,10 +59,11 @@ export default function GlobeCanvas({
   const material = useMemo(
     () =>
       new THREE.MeshPhongMaterial({
-        color: "#bfd8e2",
-        emissive: "#8fb3c3",
+        color: "#e8863a",
+        emissive: "#c96a22",
         emissiveIntensity: 0.45,
-        shininess: 0.2,
+        shininess: 0,
+        specular: "#000000",
       }),
     [],
   );
@@ -143,12 +144,12 @@ export default function GlobeCanvas({
           backgroundColor="rgba(0,0,0,0)"
           globeMaterial={material}
           showAtmosphere
-          atmosphereColor="#9dc4d4"
+          atmosphereColor="#f2a766"
           atmosphereAltitude={0.13}
           polygonsData={geo.features}
           polygonAltitude={style.altitude}
           polygonCapColor={style.cap}
-          polygonSideColor={() => "rgba(146,96,44,0.55)"}
+          polygonSideColor={() => "rgba(154,80,30,0.55)"}
           polygonStrokeColor={style.stroke}
           polygonCapCurvatureResolution={3}
           onPolygonHover={(feature) => onHover((feature as CountryFeature) ?? null)}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import LogoMark from "./LogoMark";
 import Dateline from "./Dateline";
 import { LiveDot, SearchIcon } from "./icons";
+import { sectionSlug } from "@/lib/decodes";
 import { site } from "@/lib/site";
 
 export default function Masthead() {
@@ -42,7 +43,7 @@ export default function Masthead() {
             {site.sections.map((section) => (
               <li key={section}>
                 <Link
-                  href="/#latest"
+                  href={`/section/${sectionSlug(section)}`}
                   className="text-ink-soft transition-colors hover:text-ink"
                 >
                   {section}

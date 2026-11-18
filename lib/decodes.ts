@@ -1,3 +1,4 @@
+import { site } from "./site";
 import type { DecodeCard } from "./types";
 
 /**
@@ -171,3 +172,24 @@ export function bySection(section: string, count = 3): DecodeCard[] {
     .filter((card) => card.section === section && !used.has(card.slug))
     .slice(0, count);
 }
+
+export const sectionSlug = (section: string) =>
+  section
+    .toLowerCase()
+    .replace(/&/g, " ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+export const sections = site.sections.map((name) => ({
+  name,
+  slug: sectionSlug(name),
+}));
+
+export const getDecode = (slug: string) =>
+  decodes.find((card) => card.slug === slug);
+
+export const getSection = (slug: string) =>
+  sections.find((section) => section.slug === slug);
+
+export const decodesIn = (section: string) =>
+  decodes.filter((card) => card.section === section);
